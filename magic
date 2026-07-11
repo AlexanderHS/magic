@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HOST="${1:?Usage: magic <host> [slot|--list|--kill <slot>]}"
+VERB="${2:-default}"
+
+case "$VERB" in
+  --list)
+    echo "Sessions on $HOST:"
+    ssh "$HOST" "ls /tmp/magic-*.sock 2>/dev/null | sed 's|/tmp/magic-||; s|\.sock||' || echo '  (none)'"
+    ;;
+  --kill)
+    SLOT="${3:?--kill requires a slot name}"
+    SOCK="/tmp/magic-${SLOT}.sock"
+    ssh "$HOST" "rm -f '$SOCK' && echo 'Killed: $SLOT' || echo 'Not found: $SLOT'"
+    ;;
+  *)
+    SLOT="$VERB"
+    SOCK="/tmp/magic-${SLOT}.sock"
+    echo "→ $HOST / $SLOT"
+    while true; do
+        ssh -t "$HOST" "dtach -A '$SOCK' \$SHELL" && break
+        echo "Reconnecting in 3s… (Ctrl+C to quit)"
+        sleep 3
+    done
+    ;;
+esac
