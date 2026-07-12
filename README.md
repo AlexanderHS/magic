@@ -34,6 +34,16 @@ magic arc --kill claude      # kill the claude session
 
 Because socket names are deterministic, running `magic arc` from your laptop and your phone at the same time connects both to the same session. You'll share the same terminal view.
 
+## Requirements
+
+**Local (the machine you connect from):**
+- `ssh` (standard)
+- `bash`
+
+**Remote (each host you connect to):**
+- `dtach` — installed by `install-remote.sh`
+- An AUR helper (`yay`/`paru`) on Arch, or `apt`/`dnf`/`brew` on other systems
+
 ## Install
 
 ### Local (run this once per machine you connect *from*)
