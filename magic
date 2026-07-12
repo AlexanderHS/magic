@@ -1,7 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${1:?Usage: magic <host> [slot|--list|--kill <slot>]}"
+if [[ $# -eq 0 || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    cat <<'EOF'
+Usage: magic <host> [slot]
+       magic <host> --list
+       magic <host> --kill <slot>
+
+Connect to a persistent session on a remote host. Sessions survive
+disconnects and can be rejoined from any device.
+
+  magic arc                  connect to default session on arc
+  magic arc work             connect to a named session
+  magic arc --list           show all live sessions on arc
+  magic arc --kill work      terminate a session
+
+Detach from a session: Ctrl+\  (session keeps running on the remote)
+
+Slots are independent — run 'magic arc claude' in one terminal and
+'magic arc logs' in another for two separate persistent sessions.
+Multiple devices can join the same slot simultaneously.
+
+Setup:
+  ./install-local.sh         install magic on this machine
+  ./install-remote.sh arc    install dtach on a remote host
+EOF
+    exit 0
+fi
+
+HOST="$1"
 VERB="${2:-default}"
 
 case "$VERB" in
