@@ -39,7 +39,20 @@ case "$VERB" in
   --kill)
     SLOT="${3:?--kill requires a slot name}"
     SOCK="/tmp/magic-${SLOT}.sock"
-    ssh "$HOST" "rm -f '$SOCK' && echo 'Killed: $SLOT' || echo 'Not found: $SLOT'"
+    ssh "$HOST" "bash -s" <<REMOTE
+if [[ ! -S '$SOCK' ]]; then
+    echo 'Not found: $SLOT'
+    exit 1
+fi
+# kill the dtach master and everything in its process group
+if command -v fuser &>/dev/null; then
+    fuser -k '$SOCK' 2>/dev/null || true
+elif command -v lsof &>/dev/null; then
+    lsof -t '$SOCK' 2>/dev/null | xargs -r kill || true
+fi
+rm -f '$SOCK'
+echo 'Killed: $SLOT'
+REMOTE
     ;;
   *)
     SLOT="$VERB"
